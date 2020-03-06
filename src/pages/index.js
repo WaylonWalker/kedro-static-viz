@@ -2,7 +2,7 @@ import React from "react"
 
 import Layout from "../components/layout"
 import SEO from "../components/seo"
-// import data from './pipeline.json'
+import data from './pipeline.json'
 import KedroViz from '@quantumblack/kedro-viz';
 
 class IndexPage extends React.Component {
@@ -20,7 +20,7 @@ class IndexPage extends React.Component {
       <Layout>
         <SEO title="Home" />
         <div className="pipeline" style={{ minHeight: '80vh' }}>
-          {/* {this.state.loaded === false ? 'loading' : <KedroViz style={{ height: '80vh' }} data={data} />} */}
+          {this.state.loaded === false ? 'loading' : <KedroViz style={{ height: '80vh' }} data={data} />}
         </div>
       </Layout>
     )

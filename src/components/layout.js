@@ -35,6 +35,7 @@ const Layout = ({ children }) => {
       >
         <main>{children}</main>
         <footer>
+          <a href="https://github.com/waylonWalker/kedro-static-viz/">kedro-static-viz</a>
           © {new Date().getFullYear()}, Built with
           {` `}
           <a href="https://www.gatsbyjs.org">Gatsby</a>
