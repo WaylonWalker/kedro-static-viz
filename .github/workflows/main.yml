@@ -32,6 +32,9 @@ jobs:
         npm install     
     - name: gatsby build
       run: |
+        echo "-----directory structure--------"
+        ls
+        echo "------building site--------"
         gatsby build
     - name: Deploy-viz 
       uses: crazy-max/ghaction-github-pages@v1.3.0
