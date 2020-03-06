@@ -32,7 +32,7 @@ jobs:
         cd gatsby-kedro-viz && npm install     
     - name: gatsby build
       run: |
-        cd gatsby-kedro-viz && gatsby build
+        cd kedro-static-viz && gatsby build
     - name: Deploy-viz 
       uses: crazy-max/ghaction-github-pages@v1.3.0
       with:
