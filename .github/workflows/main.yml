@@ -53,7 +53,7 @@ jobs:
         echo "-----clean--------"
         gatsby clean
         echo "------building site--------"
-        gatsby build && echo "SUCCESS" || gatsby build
+        gatsby build
     - name: Deploy-viz 
       uses: crazy-max/ghaction-github-pages@v1.3.0
       with:
