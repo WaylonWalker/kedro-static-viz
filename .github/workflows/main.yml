@@ -38,6 +38,10 @@ jobs:
       run: |
         echo "-----directory structure--------"
         ls
+        echo "-----directory structure--------"
+        ls src
+        echo "-----clean--------"
+        gatsby clean
         echo "------building site--------"
         gatsby build
     - name: Deploy-viz 
