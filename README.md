@@ -1,3 +1,5 @@
+![Deploy example site](https://github.com/WaylonWalker/kedro-static-viz/workflows/Deploy%20example%20site/badge.svg)
+
 <!-- AUTO-GENERATED-CONTENT:START (STARTER) -->
 <p align="center">
   <a href="https://www.gatsbyjs.org">
