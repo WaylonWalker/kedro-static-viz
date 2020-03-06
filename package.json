@@ -12,19 +12,22 @@
     "gatsby-plugin-offline": "^3.0.35",
     "gatsby-plugin-react-helmet": "^3.1.22",
     "gatsby-plugin-sharp": "^2.4.5",
-    "gatsby-source-filesystem": "^2.1.48",
     "gatsby-transformer-sharp": "^2.3.16",
     "prop-types": "^15.7.2",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-helmet": "^5.2.1",
-    "react-redux": "^7.2.0"
+    "react-redux": "^6.0.1"
   },
   "devDependencies": {
+    "install-peers": "^1.0.3",
     "prettier": "^1.19.1"
   },
   "keywords": [
-    "gatsby"
+    "gatsby",
+    "kedro",
+    "data",
+    "dataengineering"
   ],
   "license": "MIT",
   "scripts": {
