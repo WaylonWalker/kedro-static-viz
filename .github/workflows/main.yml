@@ -29,14 +29,14 @@ jobs:
     - name: install npm
       run: |
         npm i -g gatsby-cli
-        cd gatsby-kedro-viz && npm install     
+        npm install     
     - name: gatsby build
       run: |
-        cd kedro-static-viz && gatsby build
+        gatsby build
     - name: Deploy-viz 
       uses: crazy-max/ghaction-github-pages@v1.3.0
       with:
         target_branch: gh-pages
-        build_dir: kedro-static-viz/public
+        build_dir: public
       env:
         GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
