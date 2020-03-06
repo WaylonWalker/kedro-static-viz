@@ -37,6 +37,6 @@ jobs:
       uses: crazy-max/ghaction-github-pages@v1.3.0
       with:
         target_branch: gh-pages
-        build_dir: gatsby-kedro-viz/public
+        build_dir: kedro-static-viz/public
       env:
         GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
