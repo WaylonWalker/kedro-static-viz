@@ -1,3 +1,7 @@
+.kedro-pipeline {
+  height: 80vh !important;
+}
+
 html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;
@@ -7,6 +11,9 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+body::-webkit-scrollbar {
+  display: none;
 }
 article,
 aside,
@@ -199,7 +206,8 @@ html {
   box-sizing: inherit;
 }
 body {
-  color: hsla(0, 0%, 0%, 0.8);
+  background: rgb(47, 52, 56);
+  color: hsla(0, 0%, 96%, 0.8);
   font-family: georgia, serif;
   font-weight: normal;
   word-wrap: break-word;

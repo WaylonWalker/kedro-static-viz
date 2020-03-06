@@ -1,9 +1,9 @@
 {
-  "name": "gatsby-starter-default",
+  "name": "kedro-static.viz",
   "private": true,
-  "description": "A simple starter to get up and developing quickly with Gatsby",
+  "description": "A statically deployable kedro-viz designed for use with CI",
   "version": "0.1.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
+  "author": "Waylon Walker <waylon@waylonwalker.com>",
   "dependencies": {
     "gatsby": "^2.19.7",
     "gatsby-image": "^2.2.39",
@@ -16,7 +16,8 @@
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-helmet": "^5.2.1"
+    "react-helmet": "^5.2.1",
+    "react-redux": "^7.2.0"
   },
   "devDependencies": {
     "prettier": "^1.19.1"
