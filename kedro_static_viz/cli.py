@@ -75,13 +75,13 @@ def copy_files(directory):
     type=click.Path(exists=False, file_okay=False),
     help="Path to save the static site to",
 )
+@click.option("--version", default=False, is_flag=True, help="Prints version and exits")
 @click.option(
-    "--version",
-    default=False,
-    is_flag=True,
-    help="Prints version and exits" "Defaults to True.",
+    "--serve/--no-serve",
+    default=True,
+    help="Whether or not to serve the site after creating. Defaults to True.",
 )
-def static_viz(port, browser, load_file, pipeline, env, directory, version):
+def static_viz(port, browser, load_file, pipeline, env, directory, version, serve):
     copy_files(directory)
     if version:
         click.echo(__version__)
@@ -93,8 +93,24 @@ def static_viz(port, browser, load_file, pipeline, env, directory, version):
 
     if not Path(directory).exists():
         raise FileNotFoundError(f"Directory was not found at: {directory}")
-    if browser:
+    if browser and serve:
         webbrowser.open_new("http://localhost:{:d}/".format(port))
+
+    if serve:
+        run_static_server(directory=directory, port=port)
+
+
+def run_static_server(directory, port=4141):
+    """Serves content from the given directory on the given port
+
+    FOR DEVELOPMENT USE ONLY, use a real server for production.
+
+    behaves very much like `python -m http.server`
+
+    Arguments:
+        directory {[str]} -- Path to the directory to serve.
+        port {[int]} -- TCP port that viz will listen to
+    """
     here = Path(directory).absolute()
     handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(here))
     with socketserver.TCPServer(("", port), handler) as httpd:
