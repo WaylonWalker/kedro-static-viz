@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
-name="kedro-static-viz"
+NAME="kedro-static-viz"
 
 README = (pathlib.Path(__file__).parent / "README.md").read_text()
 
 setup(
-    name=name,
+    name=NAME,
     version='0.0.1',
     url='https://github.com/WaylonWalker/kedro-static-viz.git',
     author='Waylon Walker',
@@ -16,6 +16,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     license="MIT",
+    install_requires=["kedro", "kedro-viz"],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.6",
