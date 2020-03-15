@@ -1,13 +1,12 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Python package
 
 on:
   push:
-    branches: [ develop ]
+    branches:       
+      - '*'
   pull_request:
-    branches: [ develop ]
+    branches:
+      - '*'
 
 jobs:
   lint_test:
@@ -58,13 +57,14 @@ jobs:
         echo "ls dist"
         ls dist
         echo "------"
-#     - name: pypi-publish
-#       uses: pypa/gh-action-pypi-publish@v1.1.0
-#       with:
-#         # PyPI user
-#         # Password for your PyPI user or an access token
-#         password: {{ secrets.pypi_password }}
-#         # The repository URL to use
-#         repository_url: # optional
-#         # The target directory for distribution
-#         packages_dir: # optional, default is dist
+    - name: pypi-publish
+      if: github.ref == 'refs/heads/master'
+      uses: pypa/gh-action-pypi-publish@v1.1.0
+      with:
+        # PyPI user
+        # Password for your PyPI user or an access token
+        password: ${{ secrets.pypi_password }}
+        # The repository URL to use
+        # repository_url: # optional
+        # The target directory for distribution
+        # packages_dir: # optional, default is dist
