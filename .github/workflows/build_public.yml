@@ -52,6 +52,18 @@ jobs:
         cd ..
         tar -zcvf public.tar.gz public
         mv public.tar.gz ../kedro-static-viz
+        rm *.map
+        cd ..
+        tar -zcvf public.tar.gz public
+        mv public.tar.gz ../kedro-static-viz
+    - name: echo things
+      run: |
+        echo "---- git staus -----"
+        git status
+        echo "---- ls -----"
+        ls
+        echo "---- ls kedro-static-viz -----"
+        ls kedro-static-viz
     - name: push public.tar.gz
       uses: github-actions-x/commit@v2.3
       with:
