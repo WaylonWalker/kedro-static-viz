@@ -5,8 +5,11 @@ name: Build public.tar.gz and Deploy example to gh-pages
 # events but only for the master branch
 on:
   push:
+    branches:       
+      - '*'
+  pull_request:
     branches:
-      - develop
+      - '*'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -39,6 +42,7 @@ jobs:
         cd kedro-static-viz-gatsby/
         gatsby build
     - name: Deploy-viz 
+      if: github.ref == 'refs/heads/master'
       uses: crazy-max/ghaction-github-pages@v1.3.0
       with:
         target_branch: gh-pages
@@ -52,15 +56,8 @@ jobs:
         cd ..
         tar -zcvf public.tar.gz public
         mv public.tar.gz ../kedro_static_viz/public.tar.gz
-    - name: echo things
-      run: |
-        echo "---- git staus -----"
-        git status
-        echo "---- ls -----"
-        ls
-        echo "---- ls kedro-static-viz -----"
-        ls kedro_static_viz
     - name: push public.tar.gz
+      if: github.ref == 'refs/heads/master'
       uses: github-actions-x/commit@v2.3
       with:
         github-token: ${{ secrets.PAT }}
