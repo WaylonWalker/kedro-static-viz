@@ -61,6 +61,17 @@ jobs:
       uses: github-actions-x/commit@v2.3
       with:
         github-token: ${{ secrets.PAT }}
+        push-branch: 'master'
+        commit-message: 'update public.tar.gz'
+        force-add: 'true'
+        files: kedro_static_viz/public.tar.gz
+        name: Public-tar-bot
+        email: public-tar-bot@waylonwalker.com
+    - name: push public.tar.gz
+      if: github.ref == 'refs/heads/develop'
+      uses: github-actions-x/commit@v2.3
+      with:
+        github-token: ${{ secrets.PAT }}
         push-branch: 'develop'
         commit-message: 'update public.tar.gz'
         force-add: 'true'

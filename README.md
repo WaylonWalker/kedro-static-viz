@@ -2,7 +2,17 @@
 
 Kedro-Static-Viz creates a static website for your [Kedro](https://github.com/quantumblacklabs/kedro) data pipelines.  Kedro static viz is a very small python cli that makes your kedro-viz generated pipeline.json data available to a static appication built with gatsbyjs.  The benefit of this is that it it can be built inside of a ci service such as github actions and deployed to a number to static file hosts such as Netlify, Now.sh, github pages, S3.  Free options are endless these days.  By default the site will be built to the `public` directory.
 
+![Python package](https://github.com/WaylonWalker/kedro-static-viz/workflows/Python%20package/badge.svg?branch=master)
+
+[![PyPI version](https://badge.fury.io/py/kedro-static-viz.svg)](https://badge.fury.io/py/kedro-static-viz)
+
+
+---
+
 ## Example Site
+
+![Build public.tar.gz and Deploy example to gh-pages](https://github.com/WaylonWalker/kedro-static-viz/workflows/Build%20public.tar.gz%20and%20Deploy%20example%20to%20gh-pages/badge.svg?branch=master)
+
 
 On every push to master in this repo [kedro-static-viz.waylonwalker.com](https://kedro-static-viz.waylonwalker.com/) is built and deployed.
 
