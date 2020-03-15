@@ -1,8 +1,16 @@
 # Kedro-Static-Viz
 
-Kedro-Static-Viz creates a static website for your edro](https://github.com/quantumblacklabs/kedro) data pipelines.
+Kedro-Static-Viz creates a static website for your [Kedro](https://github.com/quantumblacklabs/kedro) data pipelines.  Kedro static viz is a very small python cli that makes your kedro-viz generated pipeline.json data available to a static appication built with gatsbyjs.  The benefit of this is that it it can be built inside of a ci service such as github actions and deployed to a number to static file hosts such as Netlify, Now.sh, github pages, S3.  Free options are endless these days.  
 
-## How do I install and use Kedro-Viz?
+## Example Site
+
+On every push to master in this repo [kedro-static-viz.waylonwalker.com](https://kedro-static-viz.waylonwalker.com/) is built and deployed.
+
+## 
+
+![](./artwork/kedro-static-viz-0-0-1.gif)
+
+## How do I install and use Kedro-Static-Viz?
 
 
 ### As a Kedro Python plugin
@@ -12,7 +20,7 @@ Kedro-Static-Viz is available as a Python plugin named `kedro-static-viz`.
 The following conditions must be true in order to visualise your pipeline:
 
 - Your project directory must be available to the Kedro-Static-Viz plugin.
-- You must be using a Kedro project structure with a complete Data Catalog, nodes and pipeline structure.
+- You must be using a [Kedro](https://github.com/quantumblacklabs/kedro) data pipelines project structure with a complete Data Catalog, nodes and pipeline structure.
 
 To install it:
 
