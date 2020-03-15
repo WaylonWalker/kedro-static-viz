@@ -40,7 +40,7 @@ jobs:
 #         pytest
     - name: build
       run: |
-        python setup.py sdist bdist_wheel
+        python setup.py sdist
         ls dist
 #     - name: pypi-publish
 #       uses: pypa/gh-action-pypi-publish@v1.1.0
