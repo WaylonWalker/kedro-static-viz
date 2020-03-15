@@ -1,6 +1,6 @@
 # Kedro-Static-Viz
 
-Kedro-Static-Viz creates a static website for your [Kedro](https://github.com/quantumblacklabs/kedro) data pipelines.  Kedro static viz is a very small python cli that makes your kedro-viz generated pipeline.json data available to a static appication built with gatsbyjs.  The benefit of this is that it it can be built inside of a ci service such as github actions and deployed to a number to static file hosts such as Netlify, Now.sh, github pages, S3.  Free options are endless these days.  
+Kedro-Static-Viz creates a static website for your [Kedro](https://github.com/quantumblacklabs/kedro) data pipelines.  Kedro static viz is a very small python cli that makes your kedro-viz generated pipeline.json data available to a static appication built with gatsbyjs.  The benefit of this is that it it can be built inside of a ci service such as github actions and deployed to a number to static file hosts such as Netlify, Now.sh, github pages, S3.  Free options are endless these days.  By default the site will be built to the `public` directory.
 
 ## Example Site
 
