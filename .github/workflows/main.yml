@@ -32,6 +32,7 @@ jobs:
         scope: '@ownername'
     - name: install npm
       run: |
+        cd kedro-static-viz-gatsby
         npm i -g gatsby-cli
         npm install     
     - name: gatsby build
@@ -51,11 +52,11 @@ jobs:
         GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
     - name: create public.tar.gz
       run: |
-        cd ~/kedro-static-viz-gatsby/public
+        cd kedro-static-viz-gatsby/public
         rm *.map
         cd ..
         tar -zcvf public.tar.gz public
-        mv public.tar.gz ~/kedro-static-viz
+        mv public.tar.gz ../kedro-static-viz
     - name: push public.tar.gz
       uses: github-actions-x/commit@v2.3
       with:
@@ -63,7 +64,7 @@ jobs:
         push-branch: 'develop'
         commit-message: 'publish'
         force-add: 'true'
-        files: ~/public.tar.gz
+        files: kedro-static-viz/public.tar.gz
         name: Public-tar-bot
         email: public-tar-bot@waylonwalker.com
         
