@@ -10,7 +10,7 @@ on:
     branches: [ develop ]
 
 jobs:
-  lint/test:
+  lint_test:
 
     runs-on: ubuntu-latest
     strategy:
@@ -40,7 +40,7 @@ jobs:
 #         pytest
   build:
     runs-on: ubuntu-latest
-    needs: lint/test
+    needs: lint_test
     steps:
     - name: build
       run: |
