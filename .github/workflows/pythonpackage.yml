@@ -40,6 +40,7 @@ jobs:
 #         pytest
     - name: build
       run: |
+        pip install wheel
         python setup.py sdist bdiist_wheel
         echo "ls dist"
         ls dist
