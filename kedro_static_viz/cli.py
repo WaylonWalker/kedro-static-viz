@@ -5,7 +5,6 @@ from functools import partial
 from pathlib import Path
 import shutil
 import click
-import subprocess
 from kedro_viz.server import _call_viz
 
 __version__ = "0.0.1"
@@ -20,7 +19,7 @@ def cli():
 
 def copy_files(directory):
     public = Path(__file__).parent / "public"
-    if public.exists() == False:
+    if public.exists() is False:
         import tarfile
 
         f = Path(__file__).parent / "public.tar.gz"
