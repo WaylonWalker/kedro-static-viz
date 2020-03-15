@@ -27,7 +27,7 @@ jobs:
     - name: Use Node.js 13.x
       uses: actions/setup-node@v1
       with:
-        node-version: 13.x
+        node-version: 12.x
         registry-url: https://npm.pkg.github.com/
         scope: '@ownername'
     - name: install npm
@@ -39,15 +39,32 @@ jobs:
         echo "-----directory structure--------"
         ls
         echo "-----directory structure--------"
-        ls src
-        echo "-----clean--------"
-        gatsby clean
+        ls ~/kedro-static-viz-gatsby/src
         echo "------building site--------"
-        gatsby build
+        cd ~/kedro-static-viz-gatsby/ && gatsby build
     - name: Deploy-viz 
       uses: crazy-max/ghaction-github-pages@v1.3.0
       with:
         target_branch: gh-pages
-        build_dir: public
+        build_dir: ~/kedro-static-viz-gatsby/public
       env:
         GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+    - name: create public.tar.gz
+      run: |
+        cd ~/kedro-static-viz-gatsby/public
+        rm *.map
+        cd ..
+        tar -zcvf public.tar.gz public
+        mv public.tar.gz ~/kedro-static-viz
+    - name: push public.tar.gz
+      uses: github-actions-x/commit@v2.3
+      with:
+        github-token: ${{ secrets.GITHUB_PAT }}
+        push-branch: 'master'
+        commit-message: 'publish'
+        force-add: 'true'
+        files: ~/public.tar.gz
+        name: Public-tar-bot
+        email: public-tar-bot@waylonwalker.com
+        
+        
