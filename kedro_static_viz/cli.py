@@ -1,4 +1,3 @@
-
 import http.server
 import socketserver
 import webbrowser
@@ -11,16 +10,19 @@ from kedro_viz.server import _call_viz
 
 __version__ = "0.0.1"
 
-VIZ_FILE = './public/pipeline.json'
+VIZ_FILE = "./public/pipeline.json"
 
-@click.group(name='Kedro-Static-Viz')
+
+@click.group(name="Kedro-Static-Viz")
 def cli():
-   pass
+    pass
+
 
 def copy_files(directory):
     public = Path(__file__).parent / "public"
     if public.exists() == False:
         import tarfile
+
         f = Path(__file__).parent / "public.tar.gz"
         tar = tarfile.open(str(f))
         tar.extractall(f.parent)
@@ -30,6 +32,7 @@ def copy_files(directory):
         shutil.rmtree(str(here))
 
     shutil.copytree(str(public), str(here), copy_function=shutil.copy)
+
 
 @cli.command()
 @click.option(
@@ -77,8 +80,7 @@ def copy_files(directory):
     "--version",
     default=False,
     is_flag=True,
-    help="Prints version and exits"
-    "Defaults to True.",
+    help="Prints version and exits" "Defaults to True.",
 )
 def static_viz(port, browser, load_file, pipeline, env, directory, version):
     copy_files(directory)
@@ -89,18 +91,17 @@ def static_viz(port, browser, load_file, pipeline, env, directory, version):
         shutil.copy(load_file, VIZ_FILE)
     else:
         _call_viz(save_file=VIZ_FILE, pipeline_name=pipeline, env=env)
-    
+
     if not Path(directory).exists():
-        raise FileNotFoundError(f'Directory was not found at: {directory}')
+        raise FileNotFoundError(f"Directory was not found at: {directory}")
     if browser:
         webbrowser.open_new("http://localhost:{:d}/".format(port))
     here = Path(directory).absolute()
     handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(here))
     with socketserver.TCPServer(("", port), handler) as httpd:
-        print('kedro-static-viz serving at port', port)
+        print("kedro-static-viz serving at port", port)
         httpd.serve_forever()
-    
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

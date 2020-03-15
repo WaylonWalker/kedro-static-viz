@@ -1,12 +1,12 @@
 __config_version__ = 1
 
 GLOBALS = {
-    'serializer': '{{major}}.{{minor}}.{{patch}}',
+    "serializer": "{{major}}.{{minor}}.{{patch}}",
 }
 
-FILES = ['setup.py', 'kedro_static_viz/__init__.py', 'kedro_static_viz/cli.py']
+FILES = ["setup.py", "kedro_static_viz/__init__.py", "kedro_static_viz/cli.py"]
 
-VERSION = ['major', 'minor', 'patch']
+VERSION = ["major", "minor", "patch"]
 
 # VCS = {
 #     'name': 'git',
