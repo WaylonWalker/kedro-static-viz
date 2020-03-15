@@ -51,7 +51,7 @@ jobs:
         rm *.map
         cd ..
         tar -zcvf public.tar.gz public
-        mv public.tar.gz ../kedro-static-viz
+        mv public.tar.gz ../kedro-static-viz/public.tar.gz
     - name: echo things
       run: |
         echo "---- git staus -----"
