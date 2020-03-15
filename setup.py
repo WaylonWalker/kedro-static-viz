@@ -1,7 +1,9 @@
 from setuptools import setup, find_packages
+from pathlib import Path
+
 NAME="kedro-static-viz"
 
-README = (pathlib.Path(__file__).parent / "README.md").read_text()
+README = (Path(__file__).parent / "README.md").read_text()
 
 setup(
     name=NAME,
