@@ -1,7 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Deploy example site
-
+name: Build public.tar.gz and Deploy example to gh-pages
 # Controls when the action will run. Triggers the workflow on push or pull request 
 # events but only for the master branch
 on:
@@ -37,19 +36,15 @@ jobs:
         npm install     
     - name: gatsby build
       run: |
-        echo "-----directory structure--------"
-        ls
-        echo "-----directory structure--------"
-        ls kedro-static-viz-gatsby/src
-        echo "------building site--------"
-        cd kedro-static-viz-gatsby/ && gatsby build
+        cd kedro-static-viz-gatsby/
+        gatsby build
     - name: Deploy-viz 
       uses: crazy-max/ghaction-github-pages@v1.3.0
       with:
         target_branch: gh-pages
         build_dir: kedro-static-viz-gatsby/public
       env:
-        GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+        GITHUB_PAT: ${{ secrets.PAT }}
     - name: create public.tar.gz
       run: |
         cd kedro-static-viz-gatsby/public
@@ -60,9 +55,9 @@ jobs:
     - name: push public.tar.gz
       uses: github-actions-x/commit@v2.3
       with:
-        github-token: ${{ secrets.GITHUB_PAT }}
+        github-token: ${{ secrets.PAT }}
         push-branch: 'develop'
-        commit-message: 'publish'
+        commit-message: 'update public.tar.gz'
         force-add: 'true'
         files: kedro-static-viz/public.tar.gz
         name: Public-tar-bot
