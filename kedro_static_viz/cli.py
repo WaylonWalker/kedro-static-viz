@@ -7,7 +7,7 @@ import shutil
 import click
 from kedro_viz.server import _call_viz
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 @click.group(name="Kedro-Static-Viz")
