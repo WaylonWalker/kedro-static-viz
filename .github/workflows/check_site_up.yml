@@ -1,0 +1,16 @@
+name: check if site is up
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  ping_site:
+    runs-on: ubuntu-latest
+    name: Ping the site
+    steps:
+    - name: Check the site
+      id: hello
+      uses: srt32/uptime@master
+      with:
+        url-to-hit: "https://kedro-static-viz.waylonwalker.com/"
+        expected-statuses: "200,301"
