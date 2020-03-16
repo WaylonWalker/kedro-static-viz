@@ -9,15 +9,13 @@ from kedro_viz.server import _call_viz
 
 __version__ = "0.1.0"
 
-VIZ_FILE = "./public/pipeline.json"
-
 
 @click.group(name="Kedro-Static-Viz")
 def cli():
     pass
 
 
-def copy_files(directory):
+def copy_site(directory):
     public = Path(__file__).parent / "public"
     if public.exists() is False:
         import tarfile
@@ -82,14 +80,15 @@ def copy_files(directory):
     help="Whether or not to serve the site after creating. Defaults to True.",
 )
 def static_viz(port, browser, load_file, pipeline, env, directory, version, serve):
-    copy_files(directory)
+    copy_site(directory)
+    viz_file = "{directory}/pipeline.json"
     if version:
         click.echo(__version__)
         return True
     if load_file:
-        shutil.copy(load_file, VIZ_FILE)
+        shutil.copy(load_file, viz_file)
     else:
-        _call_viz(save_file=VIZ_FILE, pipeline_name=pipeline, env=env)
+        _call_viz(save_file=viz_file, pipeline_name=pipeline, env=env)
 
     if not Path(directory).exists():
         raise FileNotFoundError(f"Directory was not found at: {directory}")
