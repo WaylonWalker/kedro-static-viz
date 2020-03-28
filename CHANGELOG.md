@@ -1,3 +1,7 @@
+# 0.1.2
+
+* FIX FileNotFound directory not rendered in f string
+
 # 0.1.1
 
 * FIX FileNotFound directory not passed to _call_viz
