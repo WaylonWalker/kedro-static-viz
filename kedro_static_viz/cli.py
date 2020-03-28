@@ -81,7 +81,7 @@ def copy_site(directory):
 )
 def static_viz(port, browser, load_file, pipeline, env, directory, version, serve):
     copy_site(directory)
-    viz_file = "{directory}/pipeline.json"
+    viz_file = f"{directory}/pipeline.json"
     if version:
         click.echo(__version__)
         return True
