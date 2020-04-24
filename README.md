@@ -1,4 +1,4 @@
-# Kedro-Static-Viz
+# ![Kedro-Static-Viz](./artwork/headers/1.png)
 
 Kedro-Static-Viz creates a static website for your [Kedro](https://github.com/quantumblacklabs/kedro) data pipelines.  Kedro static viz is a very small python cli that makes your kedro-viz generated pipeline.json data available to a static appication built with gatsbyjs.  The benefit of this is that it it can be built inside of a ci service such as github actions and deployed to a number to static file hosts such as Netlify, Now.sh, github pages, S3.  Free options are endless these days.  By default the site will be built to the `public` directory.
 
@@ -7,18 +7,25 @@ Kedro-Static-Viz creates a static website for your [Kedro](https://github.com/qu
 [![PyPI version](https://badge.fury.io/py/kedro-static-viz.svg)](https://badge.fury.io/py/kedro-static-viz)
 
 
+![Build public.tar.gz and Deploy example to gh-pages](https://github.com/WaylonWalker/kedro-static-viz/workflows/Build%20public.tar.gz%20and%20Deploy%20example%20to%20gh-pages/badge.svg?branch=master)
+
 ---
 
-## Example Site
-
-![Build public.tar.gz and Deploy example to gh-pages](https://github.com/WaylonWalker/kedro-static-viz/workflows/Build%20public.tar.gz%20and%20Deploy%20example%20to%20gh-pages/badge.svg?branch=master)
+## ![Example Site](./artwork/headers/2.png)
 
 
 On every push to master in this repo [kedro-static-viz.waylonwalker.com](https://kedro-static-viz.waylonwalker.com/) is built and deployed.
 
-## 
+## ![CLI Usage](./artwork/headers/3.png)
+
+```
+kedro static-viz
+```
 
 ![](./artwork/kedro-static-viz-0-0-1.gif)
+
+## ![Installation](artwork/headers/4.png)
+
 
 ## How do I install and use Kedro-Static-Viz?
 
@@ -68,3 +75,20 @@ Kedro-Viz has a number of options to customise running the visualisation:
 | `--env`, `-e`            | Kedro configuration environment. If not specified, catalog config in `local` will be used.                                                                                             |
 | `--directory`            | Directory to render the static site to                                                                                                                                                 |
 | `--serve/--no-serve`     | Whether or not to serve the site after creating. Defaults to True.                                                                                                                     |
+
+## ![Contributing](./artwork/headers/5.png)
+
+**You're Awesome** for considering a contribution!  Contributions are welcome, please check out the [Contributing Guide](./contributing.md) for more information.  Please be a positive member of the community and embrace feedback
+
+## ![Versioning](./artwork/headers/6.png)
+
+We use [SemVer](https://semver.org/) for versioning. For the versions available, see the [tags on this repository](./tags).
+
+
+## ![Authors](./artwork/headers/7.png)
+
+[![Waylon Walker](https://avatars1.githubusercontent.com/u/22648375?s=120&v=4)](https://github.com/WaylonWalker) - Waylon Walker - _Original Author_
+
+## ![License](./artwork/headers/8.png)
+
+This project is licensed under the MIT License - see the LICENSE file for details
