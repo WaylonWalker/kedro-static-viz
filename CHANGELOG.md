@@ -1,3 +1,7 @@
+# 0.1.3
+
+* integrate LICENSE into manifest.in for conda build
+
 # 0.1.2
 
 * FIX FileNotFound directory not rendered in f string
