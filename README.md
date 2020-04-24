@@ -58,13 +58,13 @@ kedro static-viz
 This command will run kedro_viz.server on `http://127.0.0.1:4141/` which cannot be accessed from another machine.
 
 Kedro-Viz has a number of options to customise running the visualisation:
+
 | CLI command              | Description                                                                                                                                                                            |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `--port`                 | TCP port that viz will listen to. Defaults to 4141.                                                                                                                                    |
 | `--browser/--no-browser` | Whether to open viz interface in the default browser or not.                                                                                                                           |
 | `--load-file`            | Path to load the pipeline JSON file                                                                                                                                                    |
 | `--pipeline`             | Name of the [modular pipeline](https://kedro.readthedocs.io/en/latest/04_user_guide/06_pipelines.html#modular-pipelines) to visualise. If not set, the default pipeline is visualised. |
-| `--env`, `-e`            | Kedro configuration environment. If not specified, catalog config in `local` will be used.                   
-| `--directory`            | Directory to render the static site to |
-| `--serve/--no-serve` | Whether or not to serve the site after creating. Defaults to True. |
-
+| `--env`, `-e`            | Kedro configuration environment. If not specified, catalog config in `local` will be used.                                                                                             |
+| `--directory`            | Directory to render the static site to                                                                                                                                                 |
+| `--serve/--no-serve`     | Whether or not to serve the site after creating. Defaults to True.                                                                                                                     |
