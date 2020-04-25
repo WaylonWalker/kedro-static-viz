@@ -3,12 +3,6 @@ name: Python package and publish to pypi
 on:
   release:
     types: [published]
-  push:
-    branches:       
-      - '*'
-  pull_request:
-    branches:
-      - '*'
         
 jobs:
   lint_test:
