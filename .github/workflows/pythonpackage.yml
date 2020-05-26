@@ -1,13 +1,9 @@
-name: Python package
+name: Python package and publish to pypi
 
 on:
-  push:
-    branches:       
-      - '*'
-  pull_request:
-    branches:
-      - '*'
-
+  release:
+    types: [published]
+        
 jobs:
   lint_test:
 
