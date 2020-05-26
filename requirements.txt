@@ -1,3 +1,2 @@
 kedro
-kedro_viz
 click
