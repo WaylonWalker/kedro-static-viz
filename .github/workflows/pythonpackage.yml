@@ -44,6 +44,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install interrogate mypy
+    - name: TypeCheck with mypy
+      run: mypy kedro_static_viz
+    - name: interrogate for docstrings
+      run: interrogate kedro_static_viz -f 100 -vv --exclude kedro_static_viz/vendored.py
     - name: build
       run: |
         pip install wheel
