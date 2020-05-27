@@ -8,7 +8,7 @@ README = (Path(__file__).parent / "README.md").read_text()
 
 setup(
     name=NAME,
-    version="0.2.0",
+    version="0.2.1",
     url="https://github.com/WaylonWalker/kedro-static-viz.git",
     author="Waylon Walker",
     author_email="waylon@waylonwalker.com",
