@@ -6,10 +6,10 @@ name: Build public.tar.gz and Deploy example to gh-pages
 on:
   push:
     branches:       
-      - '*'
+      - 'update-npm'
   pull_request:
     branches:
-      - '*'
+      - 'update-npm'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -56,23 +56,23 @@ jobs:
         cd ..
         tar -zcvf public.tar.gz public
         mv public.tar.gz ../kedro_static_viz/public.tar.gz
+    # - name: push public.tar.gz
+    #   if: github.ref == 'refs/heads/master'
+    #   uses: github-actions-x/commit@v2.3
+    #   with:
+    #     github-token: ${{ secrets.PAT }}
+    #     push-branch: 'master'
+    #     commit-message: 'update public.tar.gz'
+    #     force-add: 'true'
+    #     files: kedro_static_viz/public.tar.gz
+    #     name: Public-tar-bot
+    #     email: public-tar-bot@waylonwalker.com
     - name: push public.tar.gz
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/up'
       uses: github-actions-x/commit@v2.3
       with:
         github-token: ${{ secrets.PAT }}
-        push-branch: 'master'
-        commit-message: 'update public.tar.gz'
-        force-add: 'true'
-        files: kedro_static_viz/public.tar.gz
-        name: Public-tar-bot
-        email: public-tar-bot@waylonwalker.com
-    - name: push public.tar.gz
-      if: github.ref == 'refs/heads/develop'
-      uses: github-actions-x/commit@v2.3
-      with:
-        github-token: ${{ secrets.PAT }}
-        push-branch: 'develop'
+        push-branch: 'update-npm'
         commit-message: 'update public.tar.gz'
         force-add: 'true'
         files: kedro_static_viz/public.tar.gz
