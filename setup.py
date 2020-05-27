@@ -19,11 +19,12 @@ setup(
     zip_safe=False,
     include_package_data=True,
     license="MIT",
-    install_requires=["kedro", "kedro-viz", "click"],
+    install_requires=["kedro", "click"],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     # package_data={"public": ['**/public/**/*']},
     entry_points={

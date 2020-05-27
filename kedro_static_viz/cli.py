@@ -1,3 +1,4 @@
+"module to provide command line interface for kedro-static-viz"
 import http.server
 import socketserver
 import webbrowser
@@ -5,17 +6,24 @@ from functools import partial
 from pathlib import Path
 import shutil
 import click
-from kedro_viz.server import _call_viz
+from .vendored import _call_viz
+
+from typing import Union
 
 __version__ = "0.1.3"
 
 
 @click.group(name="Kedro-Static-Viz")
-def cli():
+def cli() -> None:
+    "kedro-static-viz command line interface"
     pass
 
 
-def copy_site(directory):
+def copy_site(directory: Path) -> None:
+    """
+    unzips the prebuilt gatsby site inside the install directory if needed
+    then copies it into the public directory
+    """
     public = Path(__file__).parent / "public"
     if public.exists() is False:
         import tarfile
@@ -79,12 +87,22 @@ def copy_site(directory):
     default=True,
     help="Whether or not to serve the site after creating. Defaults to True.",
 )
-def static_viz(port, browser, load_file, pipeline, env, directory, version, serve):
+def static_viz(
+    port: int,
+    browser: bool,
+    load_file: Path,
+    pipeline: str,
+    env: str,
+    directory: Path,
+    version: bool,
+    serve: bool,
+) -> None:
+    "main kedro-static-viz command"
     copy_site(directory)
     viz_file = f"{directory}/pipeline.json"
     if version:
         click.echo(__version__)
-        return True
+        return
     if load_file:
         shutil.copy(load_file, viz_file)
     else:
@@ -99,7 +117,7 @@ def static_viz(port, browser, load_file, pipeline, env, directory, version, serv
         run_static_server(directory=directory, port=port)
 
 
-def run_static_server(directory, port=4141):
+def run_static_server(directory: Union[str, Path], port: int = 4141) -> None:
     """Serves content from the given directory on the given port
 
     FOR DEVELOPMENT USE ONLY, use a real server for production.
