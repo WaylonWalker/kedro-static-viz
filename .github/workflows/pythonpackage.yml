@@ -2,7 +2,7 @@ name: Python package and publish to pypi
 
 on:
   push:
-    branch: master
+    tags: '*'
         
 jobs:
   lint_test:
