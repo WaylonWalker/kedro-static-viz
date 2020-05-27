@@ -24,7 +24,7 @@ jobs:
         pip install -r requirements.txt
         pip install flake8 mypy interrogate
     - name: Lint with flake8
-      run: flake8 kedro_static_viz
+      run: flake8 kedro_static_viz --exclude vendored.py
     - name: TypeCheck with mypy
       run: mypy kedro_static_viz
 #     - name: Test with pytest
