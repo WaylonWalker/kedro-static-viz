@@ -1,28 +1,26 @@
 {
-  "name": "gatsby-starter-default",
+  "name": "kedro-static-viz",
   "private": true,
-  "description": "A simple starter to get up and developing quickly with Gatsby",
+  "description": "A way to deploy kedro-viz as static content",
   "version": "0.1.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
+  "author": "Waylon Walker waylon@waylonwalker.com",
   "dependencies": {
-    "@quantumblack/kedro-viz": "3.0.1",
-    "gatsby": "^2.19.29",
-    "gatsby-image": "^2.2.42",
-    "gatsby-plugin-manifest": "^2.2.42",
-    "gatsby-plugin-offline": "^3.0.35",
-    "gatsby-plugin-react-helmet": "^3.1.22",
-    "gatsby-plugin-sharp": "^2.4.5",
-    "gatsby-source-filesystem": "^2.1.48",
-    "gatsby-transformer-sharp": "^2.3.16",
+    "@quantumblack/kedro-viz": "^3.3.0",
+    "gatsby": "^2.22.11",
+    "gatsby-image": "^2.4.5",
+    "gatsby-plugin-manifest": "^2.4.9",
+    "gatsby-plugin-offline": "^3.2.7",
+    "gatsby-plugin-sharp": "^2.6.9",
+    "gatsby-source-filesystem": "^2.3.8",
+    "gatsby-transformer-sharp": "^2.5.3",
     "prop-types": "^15.7.2",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0",
-    "react-helmet": "^5.2.1",
-    "react-redux": "^6.0.1"
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-redux": "^7.2.0"
   },
   "devDependencies": {
     "install-peers": "^1.0.3",
-    "prettier": "^1.19.1"
+    "prettier": "^2.0.5"
   },
   "keywords": [
     "gatsby",
@@ -42,9 +40,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gatsbyjs/gatsby-starter-default"
+    "url": "https://github.com/WaylonWalker/kedro-static-viz"
   },
   "bugs": {
-    "url": "https://github.com/gatsbyjs/gatsby/issues"
+    "url": "https://github.com/WaylonWalker/kedro-static-viz/issues"
   }
 }
