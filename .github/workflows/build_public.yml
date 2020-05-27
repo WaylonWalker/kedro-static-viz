@@ -6,9 +6,11 @@ name: Build public.tar.gz and Deploy example to gh-pages
 on:
   push:
     branches:       
+      - 'master'
       - 'update-npm'
   pull_request:
     branches:
+      - 'master'
       - 'update-npm'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -71,7 +73,7 @@ jobs:
     #     name: Public-tar-bot
     #     email: public-tar-bot@waylonwalker.com
     - name: push public.tar.gz
-      if: github.ref == 'refs/heads/up'
+      if: github.ref == 'refs/heads/update-npm'
       uses: github-actions-x/commit@v2.3
       with:
         github-token: ${{ secrets.PAT }}
