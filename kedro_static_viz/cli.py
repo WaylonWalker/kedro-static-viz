@@ -1,3 +1,4 @@
+"module to provide command line interface for kedro-static-viz"
 import http.server
 import socketserver
 import webbrowser
@@ -14,10 +15,15 @@ __version__ = "0.1.3"
 
 @click.group(name="Kedro-Static-Viz")
 def cli() -> None:
+    "kedro-static-viz command line interface"
     pass
 
 
 def copy_site(directory: Path) -> None:
+    """
+    unzips the prebuilt gatsby site inside the install directory if needed
+    then copies it into the public directory
+    """
     public = Path(__file__).parent / "public"
     if public.exists() is False:
         import tarfile
@@ -91,6 +97,7 @@ def static_viz(
     version: bool,
     serve: bool,
 ) -> None:
+    "main kedro-static-viz command"
     copy_site(directory)
     viz_file = f"{directory}/pipeline.json"
     if version:
