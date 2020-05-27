@@ -52,7 +52,10 @@ jobs:
     - name: create public.tar.gz
       run: |
         cd kedro-static-viz-gatsby/public
-        rm *.map
+        rm *map*
+        rm -rf icons
+        rm webpack.stats.json
+
         cd ..
         tar -zcvf public.tar.gz public
         mv public.tar.gz ../kedro_static_viz/public.tar.gz
