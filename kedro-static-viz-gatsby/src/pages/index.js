@@ -1,7 +1,6 @@
 import React from "react"
 
 import Layout from "../components/layout"
-import SEO from "../components/seo"
 import KedroViz from '@quantumblack/kedro-viz';
 
 class IndexPage extends React.Component {
@@ -19,7 +18,6 @@ class IndexPage extends React.Component {
   render() {
     return (
       <Layout>
-        {/* <SEO title="Home" /> */}
         <div className="pipeline" style={{ minHeight: '80vh' }}>
           {this.state.pipelineData === undefined ? 'loading' : <KedroViz style={{ height: '80vh' }} data={this.state.pipelineData} />}
         </div>
