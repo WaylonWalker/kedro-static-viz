@@ -10,7 +10,7 @@ from .vendored import _call_viz
 
 from typing import Union
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 
 @click.group(name="Kedro-Static-Viz")
