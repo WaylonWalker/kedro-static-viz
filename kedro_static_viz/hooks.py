@@ -7,8 +7,8 @@ below.
 
 Example:
 
-    >>> from kedro_static_viz import static_viz_hook
-    >>> hooks = [static_viz_hook()]
+    >>> from kedro_static_viz.hooks import StaticViz
+    >>> hooks = [StaticViz()]
 """
 
 
@@ -20,7 +20,7 @@ from kedro.framework.hooks import hook_impl
 from .core import static_viz
 
 
-class static_viz_hook:
+class StaticViz:
     """
     creates static viz before pipeline run
 
@@ -36,8 +36,8 @@ class static_viz_hook:
 
     Example:
 
-        >>> from kedro_static_viz import static_viz_hook
-        >>> hooks = [static_viz_hook()]
+        >>> from kedro_static_viz.hooks import StaticViz
+        >>> hooks = [StaticViz()]
     """
 
     def __init__(
