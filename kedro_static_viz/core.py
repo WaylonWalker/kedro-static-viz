@@ -44,7 +44,7 @@ def static_viz(
 
     Arguments:
         port (int): TCP port that viz will listen to. Default is 4141.
-        brower (bool): Whether to open viz interface in the default browser or not. 
+        brower (bool): Whether to open viz interface in the default browser or not.
             Default is False
         load_file (str, Path, None): Path to load the pipeline JSON file
         pipeline (str): The name of the modular pipeline to visualize. Default is None
@@ -52,7 +52,7 @@ def static_viz(
             catalog config in `local` will be used. Default is None
         directory (str, Path): Path to save the static site to. Default is 'public'
         serve (bool): Whether or not to serve the site after creating. Default is False.
-    
+
     Returns (None): None
 
     """
