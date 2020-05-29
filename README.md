@@ -31,7 +31,7 @@ from kedro_static_viz import static_viz
 static_viz()
 ```
 
-## !![Hooks Usage](./artwork/headers/5.png)
+## ![Hooks Usage](./artwork/headers/5.png)
 
 ``` python
 from kedro_static_viz.hooks import StaticViz
