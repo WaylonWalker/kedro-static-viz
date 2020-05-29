@@ -22,9 +22,30 @@ On every push to master in this repo [kedro-static-viz.waylonwalker.com](https:/
 kedro static-viz
 ```
 
+## !![Python Usage](./artwork/headers/4.png)
+
+The `static_viz` function is callable from inside your project directory.
+
+```python
+from kedro_static_viz import static_viz
+static_viz()
+```
+
+## !![Hooks Usage](./artwork/headers/5.png)
+
+``` python
+from kedro_static_viz.hooks import StaticViz
+
+class ProjectContext(KedroContext):
+   project_name = "kedro0160"
+   project_version = "0.16.1"
+   package_name = "kedro0160"
+   hooks = [ StaticViz() ]
+```
+
 ![](./artwork/kedro-static-viz-0-0-1.gif)
 
-## ![Installation](artwork/headers/4.png)
+## ![Installation](artwork/headers/6.png)
 
 
 ## How do I install and use Kedro-Static-Viz?
@@ -76,19 +97,19 @@ Kedro-Viz has a number of options to customise running the visualisation:
 | `--directory`            | Directory to render the static site to                                                                                                                                                 |
 | `--serve/--no-serve`     | Whether or not to serve the site after creating. Defaults to True.                                                                                                                     |
 
-## ![Contributing](./artwork/headers/5.png)
+## ![Contributing](./artwork/headers/7.png)
 
 **You're Awesome** for considering a contribution!  Contributions are welcome, please check out the [Contributing Guide](./contributing.md) for more information.  Please be a positive member of the community and embrace feedback
 
-## ![Versioning](./artwork/headers/6.png)
+## ![Versioning](./artwork/headers/8.png)
 
 We use [SemVer](https://semver.org/) for versioning. For the versions available, see the [tags on this repository](./tags).
 
 
-## ![Authors](./artwork/headers/7.png)
+## ![Authors](./artwork/headers/9.png)
 
 [![Waylon Walker](https://avatars1.githubusercontent.com/u/22648375?s=120&v=4)](https://github.com/WaylonWalker) - Waylon Walker - _Original Author_
 
-## ![License](./artwork/headers/8.png)
+## ![License](./artwork/headers/10.png)
 
 This project is licensed under the MIT License - see the LICENSE file for details
