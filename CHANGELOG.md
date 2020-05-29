@@ -1,7 +1,7 @@
 # 0.3.0
 
-* made `kedro_viz` callable from python
-* created `kedro_viz_hook` to create static viz before pipeline run
+* made `kedro_static_viz.static_viz` callable from python
+* created `kedro_static_viz.hooks.StaticViz` to create static viz before pipeline run
 
 # 0.2.3
 
