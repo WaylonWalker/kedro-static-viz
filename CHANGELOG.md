@@ -1,3 +1,15 @@
+# 0.3.0
+
+* made `kedro_viz` callable from python
+* created `kedro_viz_hook` to create static viz before pipeline run
+
+# 0.2.3
+
+_release went sideways causing the patches_
+
+* remove kedro_viz as a dependency
+* allow for python 3.8
+
 # 0.1.3
 
 * integrate LICENSE into manifest.in for conda build
