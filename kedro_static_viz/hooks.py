@@ -45,14 +45,14 @@ class StaticViz:
         pipeline: str = None,
         env: str = None,
         directory: Union[str, Path] = "public",
-    ):
+    ) -> None:
         "initializes static_viz_hook"
         self.pipeline = pipeline
         self.env = env
         self.directory = directory
 
     @hook_impl
-    def before_pipeline_run(self):
+    def before_pipeline_run(self) -> None:
         "createts static viz before pipeline run"
         # breakpoint()
         static_viz(
