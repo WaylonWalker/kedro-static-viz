@@ -1,3 +1,11 @@
+"""
+core python functionality to create a static viz site with python from inside the
+project directory
+
+Example:
+    >>> from kedro_static_viz import static_viz
+    >>> static_viz()
+"""
 import http.server
 import shutil
 import socketserver
