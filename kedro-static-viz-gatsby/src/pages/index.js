@@ -1,29 +1,22 @@
 import React from "react"
-
 import Layout from "../components/layout"
-import KedroViz from '@quantumblack/kedro-viz';
 
-class IndexPage extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      pipelineData: undefined
-    }
-    this.componentDidMount = () => {
-      fetch('/pipeline.json')
-        .then(response => response.json())
-        .then(data => this.setState({ pipelineData: data }))
-    }
-  }
-  render() {
+const StaticKedroViz = React.lazy(() =>
+    import("../components/StaticKedroViz")
+)
+
+const IndexPage = () => {
+    const isSSR = typeof window === "undefined"
+
     return (
       <Layout>
-        <div className="pipeline" style={{ minHeight: '80vh' }}>
-          {this.state.pipelineData === undefined ? 'loading' : <KedroViz style={{ height: '80vh' }} data={this.state.pipelineData} />}
-        </div>
+        {!isSSR && (
+          <React.Suspense fallback={<div />}>
+            <StaticKedroViz />
+          </React.Suspense>
+        )}
       </Layout>
     )
   }
-}
 
 export default IndexPage
