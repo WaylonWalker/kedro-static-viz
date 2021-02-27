@@ -5,7 +5,7 @@ import click
 
 from .core import static_viz as _static_viz
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 
 @click.group(name="Kedro-Static-Viz")
