@@ -20,7 +20,10 @@
   },
   "devDependencies": {
     "install-peers": "^1.0.3",
-    "prettier": "^2.0.5"
+    "prettier": "^2.0.5",
+    "query-string": "^6.14.1",
+    "react-error-overlay": "^6.0.9",
+    "webpack": "^5.24.2"
   },
   "keywords": [
     "gatsby",
