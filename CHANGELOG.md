@@ -1,3 +1,10 @@
+
+# 0.3.1
+
+* FIX: add semver to requirements.txt
+
+Also added requirements_dev.txt and run interrogate on test-lint.
+
 # 0.3.0
 
 * made `kedro_static_viz.static_viz` callable from python
