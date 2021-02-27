@@ -1,34 +1,47 @@
 """ Kedro-Viz plugin and webserver """
-
+# pylint: disable=protected-access
 import hashlib
+import inspect
 import json
+import logging
 import multiprocessing
 import socket
+import sys
+import traceback
+import webbrowser
 from collections import defaultdict
 from contextlib import closing
+from functools import partial
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set, Union
 
+import click
 import kedro
 import requests
+from flask import Flask, abort, jsonify, send_from_directory
+from IPython.core.display import HTML, display
+from kedro.framework.cli.utils import KedroCliError
+from kedro.framework.context import KedroContextError, load_context
+from kedro.io import AbstractDataSet, DataCatalog, DataSetNotFoundError
+from kedro.pipeline.node import Node
 from semver import VersionInfo
 from toposort import toposort_flatten
 
+from kedro_viz.utils import wait_for
 
 KEDRO_VERSION = VersionInfo.parse(kedro.__version__)
 
-if KEDRO_VERSION.match(">=0.16.0"):
-    from kedro.framework.cli import get_project_context
-    from kedro.framework.cli.utils import KedroCliError
-else:
-    from kedro.cli import get_project_context  # type: ignore
-    from kedro.cli.utils import KedroCliError  # type: ignore
-
-
 _VIZ_PROCESSES = {}  # type: Dict[int, multiprocessing.Process]
 
-data = None  # pylint: disable=invalid-name
+_DEFAULT_KEY = "__default__"
 
+_DATA = None  # type: Dict
+_CATALOG = None  # type: DataCatalog
+_JSON_NODES = {}  # type: Dict[str, Dict[str, Union[Node, AbstractDataSet, Dict, None]]]
+
+app = Flask(  # pylint: disable=invalid-name
+    __name__, static_folder=str(Path(__file__).parent.absolute() / "html" / "static")
+)
 
 ERROR_PROJECT_ROOT = (
     "Could not find a Kedro project root. You can run `kedro viz` by either providing "
@@ -40,6 +53,15 @@ ERROR_PIPELINE_FLAG_NOT_SUPPORTED = (
     "`--pipeline` flag was provided, but it is not supported "
     "in Kedro version {}".format(kedro.__version__)
 )
+
+
+@app.route("/")
+@app.route("/<path:subpath>")
+def root(subpath="index.html"):
+    """Serve the non static html and js etc"""
+    return send_from_directory(
+        str(Path(__file__).parent.absolute() / "html"), subpath, cache_timeout=0
+    )
 
 
 def _hash(value):
@@ -54,6 +76,49 @@ def _check_viz_up(port):
         return False
 
     return response.status_code == 200
+
+
+# pylint: disable=unused-argument
+def run_viz(port=None, line=None, local_ns=None) -> None:
+    """
+    Line magic function to start kedro viz. It calls a kedro viz in a process and display it in
+    the Jupyter notebook environment.
+
+    Args:
+        port: TCP port that viz will listen to. Defaults to 4141.
+        line: line required by line magic interface.
+        local_ns: Local namespace with local variables of the scope where the line magic is invoked.
+            For more details, please visit:
+            https://ipython.readthedocs.io/en/stable/config/custommagics.html
+
+    """
+    port = port or 4141  # Default argument doesn't work in Jupyter line magic.
+    port = _allocate_port(start_at=port)
+
+    if port in _VIZ_PROCESSES and _VIZ_PROCESSES[port].is_alive():
+        _VIZ_PROCESSES[port].terminate()
+
+    if local_ns is not None and "project_path" in local_ns:
+        target = partial(_call_viz, project_path=local_ns["project_path"])
+    else:
+        target = _call_viz
+
+    viz_process = multiprocessing.Process(
+        target=target, daemon=True, kwargs={"port": port}
+    )
+
+    viz_process.start()
+    _VIZ_PROCESSES[port] = viz_process
+
+    wait_for(func=_check_viz_up, port=port)
+
+    wrapper = """
+            <html lang="en"><head></head><body style="width:100; height:100;">
+            <iframe src="http://127.0.0.1:{}/" height=500 width="100%"></iframe>
+            </body></html>""".format(
+        port
+    )
+    display(HTML(wrapper))
 
 
 def _allocate_port(start_at: int, end_at: int = 65535) -> int:
@@ -76,37 +141,20 @@ def _allocate_port(start_at: int, end_at: int = 65535) -> int:
 
 
 def _load_from_file(load_file: str) -> dict:
-    global data  # pylint: disable=global-statement,invalid-name
-    data = json.loads(Path(load_file).read_text())
+    global _DATA  # pylint: disable=global-statement,invalid-name
+    _DATA = json.loads(Path(load_file).read_text())
     for key in ["nodes", "edges", "tags"]:
-        if key not in data:
+        if key not in _DATA:
             raise KedroCliError(
                 "Invalid file, top level key '{}' not found.".format(key)
             )
-    return data
+    return _DATA
 
 
-def _get_pipeline_from_context(context, pipeline_name):
-    if KEDRO_VERSION.match(">=0.15.2"):
-        return context._get_pipeline(  # pylint: disable=protected-access
-            name=pipeline_name
-        )
-    # Kedro 0.15.0 or 0.15.1
+def _get_pipelines_from_context(context, pipeline_name) -> Dict[str, "Pipeline"]:
     if pipeline_name:
-        raise KedroCliError(ERROR_PIPELINE_FLAG_NOT_SUPPORTED)
-    return context.pipeline
-
-
-def _get_pipeline_catalog_from_kedro14(env):
-    try:
-        pipeline = get_project_context("create_pipeline")()
-        get_config = get_project_context("get_config")
-        conf = get_config(str(Path.cwd()), env)
-        create_catalog = get_project_context("create_catalog")
-        catalog = create_catalog(config=conf)
-        return pipeline, catalog
-    except (ImportError, KeyError):
-        raise KedroCliError(ERROR_PROJECT_ROOT)
+        return {pipeline_name: context._get_pipeline(name=pipeline_name)}
+    return context.pipelines
 
 
 def _sort_layers(
@@ -156,7 +204,7 @@ def _sort_layers(
     Raises:
         CircularDependencyError: When the layers have cyclic dependencies.
     """
-    node_layers = {}  # type: ignore
+    node_layers = {}  # map node_id to the layers that depend on it
 
     def find_child_layers(node_id: str) -> Set[str]:
         """For the given node_id, find all layers that depend on it in a depth-first manner.
@@ -204,113 +252,386 @@ def _sort_layers(
     return toposort_flatten(layer_dependencies)
 
 
-def _construct_layer_mapping(catalog):
-    if hasattr(catalog, "layers"):  # kedro>=0.16.0
-        if catalog.layers is None:
-            return {
-                ds_name: None for ds_name in catalog._data_sets
-            }  # pylint: disable=protected-access
+def _construct_layer_mapping():
+    if _CATALOG.layers is None:
+        return {ds_name: None for ds_name in _CATALOG._data_sets}
 
-        dataset_to_layer = {}
-        for layer, dataset_names in catalog.layers.items():
-            dataset_to_layer.update(
-                {dataset_name: layer for dataset_name in dataset_names}
-            )
-    else:
-        dataset_to_layer = {
-            ds_name: getattr(ds_obj, "_layer", None)
-            for ds_name, ds_obj in catalog._data_sets.items()  # pylint: disable=protected-access
-        }
+    dataset_to_layer = {}
+    for layer, dataset_names in _CATALOG.layers.items():
+        dataset_to_layer.update({dataset_name: layer for dataset_name in dataset_names})
 
     return dataset_to_layer
 
 
-# pylint: disable=too-many-locals
-def format_pipeline_data(pipeline, catalog):
+def _pretty_name(name: str) -> str:
+    name = name.replace("-", " ").replace("_", " ")
+    parts = [n.capitalize() for n in name.split()]
+    return " ".join(parts)
+
+
+def format_pipelines_data(pipelines: Dict[str, "Pipeline"]) -> Dict[str, list]:
     """
-    Format pipeline and catalog data from Kedro for kedro-viz
+    Format pipelines and catalog data from Kedro for kedro-viz.
 
     Args:
-        pipeline: Kedro pipeline object
-        catalog:  Kedro catalog object
+        pipelines: Dictionary of Kedro pipeline objects.
+
+    Returns:
+        Dictionary of pipelines, nodes, edges, tags and layers, and pipelines list.
+
     """
-
-    def pretty_name(name):
-        name = name.replace("-", " ").replace("_", " ")
-        parts = [n[0].upper() + n[1:] for n in name.split()]
-        return " ".join(parts)
-
+    pipelines_list = []
+    # keep track of a sorted list of nodes to returned to the client
+    nodes_list = []
+    # keep track of edges in the graph: [{source_node_id -> target_node_id}]
+    edges_list = []
     # keep tracking of node_id -> node data in the graph
     nodes = {}
-    # keep track of a sorted list of nodes to returned to the client
-    sorted_nodes = []
     # keep track of node_id -> set(child_node_ids) for layers sorting
     node_dependencies = defaultdict(set)
-    # keep track of edges in the graph: [{source_node_id -> target_node_id}]
-    edges = []
+    tags = set()
+
+    for pipeline_key, pipeline in pipelines.items():
+        pipelines_list.append({"id": pipeline_key, "name": _pretty_name(pipeline_key)})
+        format_pipeline_data(
+            pipeline_key,
+            pipeline,
+            nodes,
+            node_dependencies,
+            tags,
+            edges_list,
+            nodes_list,
+        )
+
+    # sort tags
+    sorted_tags = [{"id": tag, "name": _pretty_name(tag)} for tag in sorted(tags)]
+    # sort layers
+    sorted_layers = _sort_layers(nodes, node_dependencies)
+
+    default_pipeline = {"id": _DEFAULT_KEY, "name": _pretty_name(_DEFAULT_KEY)}
+    selected_pipeline = (
+        default_pipeline["id"]
+        if default_pipeline in pipelines_list
+        else pipelines_list[0]["id"]
+    )
+
+    return {
+        "nodes": nodes_list,
+        "edges": edges_list,
+        "tags": sorted_tags,
+        "layers": sorted_layers,
+        "pipelines": pipelines_list,
+        "selected_pipeline": selected_pipeline,
+    }
+
+
+def _is_namespace_param(namespace: str) -> bool:
+    """Returns whether a dataset namespace is a parameter"""
+    return namespace.lower().startswith("param")
+
+
+# pylint: disable=too-many-locals,too-many-arguments,too-many-branches
+def format_pipeline_data(
+    pipeline_key: str,
+    pipeline: "Pipeline",  # noqa: F821
+    nodes: Dict[str, dict],
+    node_dependencies: Dict[str, Set[str]],
+    tags: Set[str],
+    edges_list: List[dict],
+    nodes_list: List[dict],
+) -> None:
+    """Format pipeline and catalog data from Kedro for kedro-viz.
+
+    Args:
+        pipeline_key: key value of a pipeline object (e.g "__default__").
+        pipeline: Kedro pipeline object.
+        nodes: Dictionary of id and node dict.
+        node_dependencies: Dictionary of id and node dependencies.
+        edges_list: List of all edges.
+        nodes_list: List of all nodes.
+
+    """
     # keep_track of {data_set_namespace -> set(tags)}
     namespace_tags = defaultdict(set)
     # keep track of {data_set_namespace -> layer it belongs to}
     namespace_to_layer = {}
-    all_tags = set()
 
-    dataset_to_layer = _construct_layer_mapping(catalog)
+    dataset_to_layer = _construct_layer_mapping()
 
+    # Nodes and edges
     for node in sorted(pipeline.nodes, key=lambda n: n.name):
         task_id = _hash(str(node))
-        all_tags.update(node.tags)
-        nodes[task_id] = {
-            "type": "task",
-            "id": task_id,
-            "name": getattr(node, "short_name", node.name),
-            "full_name": getattr(node, "_func_name", str(node)),
-            "tags": sorted(node.tags),
-        }
-        sorted_nodes.append(nodes[task_id])
+        tags.update(node.tags)
+        _JSON_NODES[task_id] = {"type": "task", "obj": node}
+        if task_id not in nodes:
+            nodes[task_id] = {
+                "type": "task",
+                "id": task_id,
+                "name": getattr(node, "short_name", node.name),
+                "full_name": getattr(node, "_func_name", str(node)),
+                "tags": sorted(node.tags),
+                "pipelines": [pipeline_key],
+            }
+            nodes_list.append(nodes[task_id])
+        else:
+            nodes[task_id]["pipelines"].append(pipeline_key)
 
         for data_set in node.inputs:
             namespace = data_set.split("@")[0]
             namespace_to_layer[namespace] = dataset_to_layer.get(data_set)
             namespace_id = _hash(namespace)
-            edges.append({"source": namespace_id, "target": task_id})
+            edge = {"source": namespace_id, "target": task_id}
+            if edge not in edges_list:
+                edges_list.append(edge)
             namespace_tags[namespace].update(node.tags)
             node_dependencies[namespace_id].add(task_id)
+
+            # if it is a parameter, add it to the node's data
+            if _is_namespace_param(namespace):
+                if "parameters" not in _JSON_NODES[task_id]:
+                    _JSON_NODES[task_id]["parameters"] = {}
+
+                if namespace == "parameters":
+                    _JSON_NODES[task_id]["parameters"] = _get_dataset_data_params(
+                        namespace
+                    ).load()
+                else:
+                    parameter_name = namespace.replace("params:", "")
+                    parameter_value = _get_dataset_data_params(namespace).load()
+                    _JSON_NODES[task_id]["parameters"][parameter_name] = parameter_value
 
         for data_set in node.outputs:
             namespace = data_set.split("@")[0]
             namespace_to_layer[namespace] = dataset_to_layer.get(data_set)
             namespace_id = _hash(namespace)
-            edges.append({"source": task_id, "target": namespace_id})
+            edge = {"source": task_id, "target": namespace_id}
+            if edge not in edges_list:
+                edges_list.append(edge)
             namespace_tags[namespace].update(node.tags)
             node_dependencies[task_id].add(namespace_id)
-
-    for namespace, tags in sorted(namespace_tags.items()):
-        is_param = bool("param" in namespace.lower())
+    # Parameters and data
+    for namespace, tag_names in sorted(namespace_tags.items()):
+        is_param = _is_namespace_param(namespace)
         node_id = _hash(namespace)
-        nodes[node_id] = {
+
+        _JSON_NODES[node_id] = {
             "type": "parameters" if is_param else "data",
-            "id": node_id,
-            "name": pretty_name(namespace),
-            "full_name": namespace,
-            "tags": sorted(tags),
-            "layer": namespace_to_layer[namespace],
+            "obj": _get_dataset_data_params(namespace),
         }
-        sorted_nodes.append(nodes[node_id])
+        if is_param and namespace != "parameters":
+            # Add "parameter_name" key only for "params:" prefix.
+            _JSON_NODES[node_id]["parameter_name"] = namespace.replace("params:", "")
 
-    # sort tags
-    sorted_tags = [{"id": tag, "name": pretty_name(tag)} for tag in sorted(all_tags)]
+        if node_id not in nodes:
+            nodes[node_id] = {
+                "type": "parameters" if is_param else "data",
+                "id": node_id,
+                "name": _pretty_name(namespace),
+                "full_name": namespace,
+                "tags": sorted(tag_names),
+                "layer": namespace_to_layer[namespace],
+                "pipelines": [pipeline_key],
+            }
+            nodes_list.append(nodes[node_id])
+        else:
+            nodes[node_id]["pipelines"].append(pipeline_key)
 
-    # sort layers
-    sorted_layers = _sort_layers(nodes, node_dependencies)
 
-    return {
-        "nodes": sorted_nodes,
-        "edges": edges,
-        "tags": sorted_tags,
-        "layers": sorted_layers,
-    }
+def _get_dataset_data_params(namespace: str):
+    if KEDRO_VERSION.match(">=0.16.0"):
+        try:
+            node_data = _CATALOG._get_dataset(namespace)
+        except DataSetNotFoundError:
+            node_data = None
+    else:
+        node_data = _CATALOG._data_sets.get(namespace)  # pragma: no cover
+    return node_data
 
 
+def _get_parameter_values(node: Dict) -> Any:
+    """Get parameter values from a stored node."""
+    if node["obj"] is not None:
+        parameter_values = node["obj"].load()
+    else:  # pragma: no cover
+        parameter_values = {}
+    return parameter_values
+
+
+@app.route("/api/main")
+def nodes_json():
+    """Serve the data from all Kedro pipelines in the project.
+    This includes basic node data amongst others edges, tags, and layers.
+    """
+    return jsonify(_DATA)
+
+
+@app.route("/api/pipelines/<string:pipeline_id>")
+def pipeline_data(pipeline_id):
+    """Serve the data from a single pipeline in a Kedro project."""
+    current_pipeline = {"id": pipeline_id, "name": _pretty_name(pipeline_id)}
+    if current_pipeline not in _DATA["pipelines"]:
+        abort(404, description="Invalid pipeline ID.")
+
+    pipeline_node_ids = set()
+    pipeline_nodes = []
+
+    for node in _DATA["nodes"]:
+        if pipeline_id in node["pipelines"]:
+            pipeline_node_ids.add(node["id"])
+            pipeline_nodes.append(node)
+
+    pipeline_edges = []
+    for edge in _DATA["edges"]:
+        if {edge["source"], edge["target"]} <= pipeline_node_ids:
+            pipeline_edges.append(edge)
+
+    return jsonify(
+        {
+            "nodes": pipeline_nodes,
+            "edges": pipeline_edges,
+            "tags": _DATA["tags"],
+            "layers": _DATA["layers"],
+            "pipelines": _DATA["pipelines"],
+            "selected_pipeline": current_pipeline["id"],
+        }
+    )
+
+
+@app.route("/api/nodes/<string:node_id>")
+def nodes_metadata(node_id):
+    """Serve the metadata for node and dataset."""
+    node = _JSON_NODES.get(node_id)
+    if not node:
+        abort(404, description="Invalid node ID.")
+    if node["type"] == "task":
+        task_metadata = _get_task_metadata(node)
+        return jsonify(task_metadata)
+    if node["type"] == "data":
+        dataset_metadata = _get_dataset_metadata(node)
+        return jsonify(dataset_metadata)
+
+    parameter_values = _get_parameter_values(node)
+
+    if "parameter_name" in node:
+        # In case of 'params:' prefix
+        parameters_metadata = {"parameters": {node["parameter_name"]: parameter_values}}
+    else:
+        # In case of 'parameters'
+        parameters_metadata = {"parameters": parameter_values}
+    return jsonify(parameters_metadata)
+
+
+@app.errorhandler(404)
+def resource_not_found(error):
+    """Returns HTTP 404 on resource not found."""
+    return jsonify(error=str(error)), 404
+
+
+def _get_task_metadata(node):
+    """Get a dictionary of task metadata: 'code', 'filepath' and 'docstring'.
+    For 'filepath', remove the path to the project from the full code location
+    before sending to JSON.
+
+    Example:
+        'code_full_path':   'path-to-project/project_root/path-to-code/node.py'
+        'Path.cwd().parent':'path-to-project/'
+        'filepath':    'project_root/path-to-code/node.py''
+
+    """
+    task_metadata = {"code": inspect.getsource(node["obj"]._func)}
+
+    code_full_path = Path(inspect.getfile(node["obj"]._func)).expanduser().resolve()
+    filepath = code_full_path.relative_to(Path.cwd().parent)
+    task_metadata["filepath"] = str(filepath)
+
+    docstring = inspect.getdoc(node["obj"]._func)
+    if docstring:
+        task_metadata["docstring"] = docstring
+
+    if "parameters" in node:
+        task_metadata["parameters"] = node["parameters"]
+
+    return task_metadata
+
+
+def _get_dataset_metadata(node):
+    dataset = node["obj"]
+    if dataset:
+        dataset_metadata = {
+            "type": f"{dataset.__class__.__module__}.{dataset.__class__.__qualname__}",
+            "filepath": str(dataset._describe().get("filepath")),
+        }
+    else:
+        # dataset not persisted, so no metadata defined in catalog.yml.
+        dataset_metadata = {}
+    return dataset_metadata
+
+
+@click.group(name="Kedro-Viz")
+def commands():
+    """Visualize the pipeline using kedroviz."""
+
+
+# pylint: disable=too-many-arguments
+@commands.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.option(
+    "--host",
+    default="127.0.0.1",
+    help="Host that viz will listen to. Defaults to 127.0.0.1.",
+)
+@click.option(
+    "--port",
+    default=4141,
+    type=int,
+    help="TCP port that viz will listen to. Defaults to 4141.",
+)
+@click.option(
+    "--browser/--no-browser",
+    default=True,
+    help="Whether to open viz interface in the default browser or not. "
+    "Browser will only be opened if host is localhost. Defaults to True.",
+)
+@click.option(
+    "--load-file",
+    default=None,
+    type=click.Path(exists=True, dir_okay=False),
+    help="Path to load the pipeline JSON file",
+)
+@click.option(
+    "--save-file",
+    default=None,
+    type=click.Path(dir_okay=False, writable=True),
+    help="Path to save the pipeline JSON file",
+)
+@click.option(
+    "--pipeline",
+    type=str,
+    default=None,
+    help="Name of the modular pipeline to visualize. "
+    "If not set, the default pipeline is visualized",
+)
+@click.option(
+    "--env",
+    "-e",
+    type=str,
+    default=None,
+    multiple=False,
+    envvar="KEDRO_ENV",
+    help="Kedro configuration environment. If not specified, "
+    "catalog config in `local` will be used",
+)
+def viz(host, port, browser, load_file, save_file, pipeline, env):
+    """Visualize the pipeline using kedroviz."""
+    try:
+        _call_viz(host, port, browser, load_file, save_file, pipeline, env)
+    except KedroCliError:
+        raise
+    except Exception as ex:
+        traceback.print_exc()
+        raise KedroCliError(str(ex))
+
+
+# pylint: disable=import-outside-toplevel,too-many-arguments,too-many-branches
 def _call_viz(
     host=None,
     port=None,
@@ -319,42 +640,75 @@ def _call_viz(
     save_file=None,
     pipeline_name=None,
     env=None,
+    project_path=None,
 ):
-    global data  # pylint: disable=global-statement,invalid-name
+    global _DATA  # pylint: disable=global-statement,invalid-name
+    global _CATALOG  # pylint: disable=global-statement
 
     if load_file:
         # Remove all handlers for root logger
         root_logger = logging.getLogger()
         root_logger.handlers = []
 
-        data = _load_from_file(load_file)
+        _DATA = _load_from_file(load_file)
     else:
-        if KEDRO_VERSION.match(">=0.15.0"):
-            # pylint: disable=import-outside-toplevel
-            if KEDRO_VERSION.match(">=0.16.0"):
-                from kedro.framework.context import KedroContextError
-            else:
-                from kedro.context import KedroContextError
+        try:
+            project_path = project_path or Path.cwd()
 
-            try:
-                context = get_project_context("context", env=env)
-                pipeline = _get_pipeline_from_context(context, pipeline_name)
-            except KedroContextError:
-                raise KedroCliError(ERROR_PROJECT_ROOT)
-            catalog = context.catalog
+            if KEDRO_VERSION.match(">=0.17.0"):  # pragma: no cover
+                from kedro.framework.session import KedroSession
+                from kedro.framework.startup import (  # pylint: disable=no-name-in-module,import-error
+                    _get_project_metadata,
+                )
 
-        else:
-            # Kedro 0.14.*
-            if pipeline_name:
-                raise KedroCliError(ERROR_PIPELINE_FLAG_NOT_SUPPORTED)
-            pipeline, catalog = _get_pipeline_catalog_from_kedro14(env)
+                package_name = _get_project_metadata(project_path).package_name
+                session_kwargs = dict(
+                    package_name=package_name,
+                    project_path=project_path,
+                    env=env,
+                    save_on_close=False,
+                )
+                session = KedroSession.create(  # pylint: disable=unexpected-keyword-arg
+                    **session_kwargs
+                )
+                context = session.load_context()  # pylint: disable=no-member
+                pipelines = _get_pipelines_from_context(context, pipeline_name)
+            else:  # pragma: no cover
+                context = load_context(project_path=project_path, env=env)
+                pipelines = _get_pipelines_from_context(context, pipeline_name)
+        except KedroContextError:
+            raise KedroCliError(ERROR_PROJECT_ROOT)  # pragma: no cover
 
-        data = format_pipeline_data(pipeline, catalog)
+        _CATALOG = context.catalog
+        _DATA = format_pipelines_data(pipelines)
 
     if save_file:
-        Path(save_file).write_text(json.dumps(data, indent=4, sort_keys=True))
+        Path(save_file).write_text(json.dumps(_DATA, indent=4, sort_keys=True))
     else:
         is_localhost = host in ("127.0.0.1", "localhost", "0.0.0.0")
         if browser and is_localhost:
             webbrowser.open_new("http://{}:{:d}/".format(host, port))
         app.run(host=host, port=port)
+
+
+# Launch a develop viz server manually by supplying this server script with a project_path.
+# Strictly used to launch a development server for viz.
+# pylint: disable=invalid-name
+if __name__ == "__main__":  # pragma: no cover
+    import argparse
+    from kedro.framework.startup import _get_project_metadata
+
+    parser = argparse.ArgumentParser(description="Launch a development viz server")
+    parser.add_argument("project_path", help="Path to a Kedro project")
+    parser.add_argument(
+        "--host", help="The host of the development server", default="localhost"
+    )
+    parser.add_argument(
+        "--port", help="The port of the development server", default="4142"
+    )
+    args = parser.parse_args()
+
+    source_dir = _get_project_metadata(args.project_path).source_dir
+    sys.path.append(str(source_dir))
+
+    _call_viz(host=args.host, port=args.port, project_path=args.project_path)
