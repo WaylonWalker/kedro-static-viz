@@ -1,3 +1,7 @@
+# 0.4.1
+
+* FIX: Botched release
+
 # 0.4.0
 
 * FEAT: upgrade kedro-viz to 3.9.0
