@@ -1,3 +1,7 @@
+# 0.4.4
+
+* FIX: implement requirements.txt in setup.py
+
 # 0.4.3
 
 * FIX: add missing dependency flask added in vendored module

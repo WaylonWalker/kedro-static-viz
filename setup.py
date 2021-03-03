@@ -6,6 +6,23 @@ NAME = "kedro-static-viz"
 
 README = (Path(__file__).parent / "README.md").read_text()
 
+
+def get_requirements(file):
+    """get the dependencies and installs"""
+    with open(file, "r", encoding="utf-8") as f:
+        # Make sure we strip all comments and options (e.g "--extra-index-url")
+        # that arise from a modified pip.conf file that configure global options
+        # when running kedro build-reqs
+        requires = []
+        for line in f:
+            req = line.split("#", 1)[0].strip()
+            if req and not req.startswith("--"):
+                requires.append(req)
+        return requires
+
+
+requires = get_requirements("requirements.txt")
+
 setup(
     name=NAME,
     version="0.4.3",
@@ -19,7 +36,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     license="MIT",
-    install_requires=["kedro", "click"],
+    install_requires=requires,
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.6",
