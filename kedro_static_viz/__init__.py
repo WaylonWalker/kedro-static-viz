@@ -1,5 +1,5 @@
 "kedro-static-viz"
-__version__ = "0.4.2"
+__version__ = "0.4.3"
 
 __all__ = ["cli", "static_viz", "static_viz_hook"]
 
