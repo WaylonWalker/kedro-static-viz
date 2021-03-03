@@ -1,8 +1,8 @@
 IPython
 click
-click
 flask
 kedro
 kedro_viz
+flask
 semver
 toposort

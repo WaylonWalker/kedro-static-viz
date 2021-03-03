@@ -1,3 +1,7 @@
+# 0.4.3
+
+* FIX: add missing dependency flask added in vendored module
+
 # 0.4.1, 0.4.2
 
 * FIX: Botched release
