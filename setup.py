@@ -25,7 +25,7 @@ requires = get_requirements("requirements.txt")
 
 setup(
     name=NAME,
-    version="0.4.3",
+    version="0.4.4",
     url="https://github.com/WaylonWalker/kedro-static-viz.git",
     author="Waylon Walker",
     author_email="waylon@waylonwalker.com",
